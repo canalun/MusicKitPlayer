@@ -15,19 +15,26 @@ class AppleMusicAPI {
     func getUserToken() -> String {
         var userToken = String()
         
+        print("getusertoken starting")
+        
         // 1
         let lock = DispatchSemaphore(value: 0)
         
-        // 2
-        SKCloudServiceController().requestUserToken(forDeveloperToken: developerToken) { (receivedToken, error) in
-            // 3
-            guard error == nil else { return }
-            if let token = receivedToken {
-                userToken = token
-                lock.signal()
+        SKCloudServiceController.requestAuthorization { status in
+            print("requestAuthorization")
+            guard status == .authorized else { return }
+        
+            // 2
+            SKCloudServiceController().requestUserToken(forDeveloperToken: self.developerToken) { (receivedToken, error) in
+                // 3
+                print("getusertoken requesting")
+                guard error == nil else { return }
+                if let token = receivedToken {
+                    userToken = token
+                    lock.signal()
+                }
             }
         }
-        
         // 4
         lock.wait()
         return userToken
@@ -36,6 +43,8 @@ class AppleMusicAPI {
     func fetchStorefrontID() -> String {
         let lock = DispatchSemaphore(value: 0)
         var storefrontID: String! 
+        
+        print("fetchstoreid starting")
         
         let musicURL = URL(string: "https://api.music.apple.com/v1/me/storefront")!
         var musicRequest = URLRequest(url: musicURL)
@@ -50,11 +59,13 @@ class AppleMusicAPI {
                 let result = (json["data"]).array!
                 let id = (result[0].dictionaryValue)["id"]!
                 storefrontID = id.stringValue
+                print("fetchstoreid communicating")
                 lock.signal()
             }
         }.resume()
         
         lock.wait()
+        print("fetchstoreid works")
         return storefrontID
     }
     
@@ -70,6 +81,7 @@ class AppleMusicAPI {
         
         URLSession.shared.dataTask(with: musicRequest) { (data, response, error) in
             guard error == nil else { return }
+            print("searchAppleMusicrequesting")
             if let json = try? JSON(data: data!) {
                 let result = (json["results"]["songs"]["data"]).array!
                 for song in result {
