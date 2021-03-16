@@ -12,6 +12,9 @@ import StoreKit
 class AppleMusicAPI {
     let developerToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiIsImtpZCI6IlFQV0c5N0FIMkcifQ.eyJpc3MiOiI0TFQ5N0FKTDdEIiwiZXhwIjoxNjMxNTgwNTQ0LCJpYXQiOjE2MTU4MTI1NDR9.d0frn-3UYkZVCGARqRTtmZY9ayzTeBHjTDjZDN20RCE0e43tpJEonwBYNlovSuOhi85-KUMrLfvHJl4QyToZHw"
 
+    
+    //DispatchSemaphore can be the root cause of connection error.
+    //Let's change this into a form of closure.
     func getUserToken() -> String {
         var userToken = String()
         
