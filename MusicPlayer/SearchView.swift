@@ -28,7 +28,14 @@ struct SearchView: View {
                     SKCloudServiceController.requestAuthorization { (status) in
                         if status == .authorized {
                             print("authorized")
-                            self.searchResults = AppleMusicAPI().searchAppleMusic(self.searchText)
+                            print(status)
+                            AppleMusicAPI().getUserToken(completion: {usertoken in
+                                AppleMusicAPI().fetchStorefrontID(usertoken: usertoken, completion: {storefrontID in
+                                    AppleMusicAPI().searchAppleMusic(self.searchText, usertoken: usertoken, storefrontID: storefrontID, completion: {songs in
+                                        self.searchResults = songs
+                                    })
+                                })
+                            })
                         }
                     }
                 }
