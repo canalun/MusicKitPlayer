@@ -12,6 +12,7 @@ import StoreKit
 class AppleMusicAPI {
     let developerToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiIsImtpZCI6IlFQV0c5N0FIMkcifQ.eyJpc3MiOiI0TFQ5N0FKTDdEIiwiZXhwIjoxNjMxNTgwNTQ0LCJpYXQiOjE2MTU4MTI1NDR9.d0frn-3UYkZVCGARqRTtmZY9ayzTeBHjTDjZDN20RCE0e43tpJEonwBYNlovSuOhi85-KUMrLfvHJl4QyToZHw"
     
+    //work well
     func getUserToken(completion:@escaping (String) -> Void) {
         var userToken = String()
         print("getusertoken starting")
@@ -54,7 +55,8 @@ class AppleMusicAPI {
     func searchAppleMusic(_ searchTerm: String!, usertoken: String, storefrontID: String, completion: @escaping ([Song]) -> Void) {
         var songs = [Song]()
 
-        let musicURL = URL(string: "https://api.music.apple.com/v1/catalog/\(storefrontID)/search?term=\(searchTerm.replacingOccurrences(of: " ", with: "+"))&types=songs&limit=25")!
+        let searchTermEncoded = searchTerm.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed)!
+        let musicURL = URL(string: "https://api.music.apple.com/v1/catalog/\(storefrontID)/search?term=\(searchTermEncoded.replacingOccurrences(of: " ", with: "+"))&types=songs&limit=25")!
         var musicRequest = URLRequest(url: musicURL)
         musicRequest.httpMethod = "GET"
         musicRequest.addValue("Bearer \(developerToken)", forHTTPHeaderField: "Authorization")
@@ -64,15 +66,20 @@ class AppleMusicAPI {
             guard error == nil else { return }
             print("searchAppleMusicrequesting")
             if let json = try? JSON(data: data!) {
-                let result = (json["results"]["songs"]["data"]).array!
-                var count = 0
-                for song in result {
-                    count += 1
-                    let attributes = song["attributes"]
-                    let currentSong = Song(id: attributes["playParams"]["id"].string!, name: attributes["name"].string!, artistName: attributes["artistName"].string!, artworkURL: attributes["artwork"]["url"].string!)
-                    songs.append(currentSong)
-                    if count == result.count {
-                        completion(songs)
+                if (json["results"]["songs"]["data"]).array == nil {
+                    songs = []
+                    completion(songs)
+                } else {
+                    let result = (json["results"]["songs"]["data"]).array!
+                    var count = 0
+                    for song in result {
+                        count += 1
+                        let attributes = song["attributes"]
+                        let currentSong = Song(id: attributes["playParams"]["id"].string!, name: attributes["name"].string!, artistName: attributes["artistName"].string!, artworkURL: attributes["artwork"]["url"].string!)
+                        songs.append(currentSong)
+                        if count == result.count {
+                            completion(songs)
+                        }
                     }
                 }
             } else {
@@ -173,10 +180,5 @@ class AppleMusicAPI {
          lock.wait()
          return songs
      }
-     
      */
-    
-    
-    
-    
 }

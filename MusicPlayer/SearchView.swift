@@ -29,6 +29,7 @@ struct SearchView: View {
                         if status == .authorized {
                             print("authorized")
                             print(status)
+                            //self.searchResults = AppleMusicAPI().searchAppleMusic(self.searchText)
                             AppleMusicAPI().getUserToken(completion: {usertoken in
                                 AppleMusicAPI().fetchStorefrontID(usertoken: usertoken, completion: {storefrontID in
                                     AppleMusicAPI().searchAppleMusic(self.searchText, usertoken: usertoken, storefrontID: storefrontID, completion: {songs in
